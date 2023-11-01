@@ -50,5 +50,5 @@ uritemplate==4.1.1
 urllib3==2.0.6
 Werkzeug==3.0.0
 zipp==3.17.0
-requests>=2.18.0,<=3.0.0
+requests>=2.11.1
 cachecontrol==0.13.1
