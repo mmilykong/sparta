@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스파르타의 서재</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap');
+
+        * {
+            font-family: 'Noto Sans Korean', sans-serif;
+        }
+
+        .main {
+            background-color: black;
+            color: white;
+            background-image: url('https://opening-attachments.greetinghr.com/20230201/ad9d3a55-c268-4e02-90aa-1b0c731214e7/story_main.jpg');
+            background-position: center;
+            background-size: cover;
+            text-align: center;
+        }
+
+        body {
+            background-color: black;
+        }
+
+        .mycards {
+            width: 1200px;
+            margin: 60px auto 100px auto;
+        }
+
+        .mypostingbox {
+            width: 500px;
+            margin: 20px auto 80px auto;
+
+            border: 1px solid white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .form-floating>input {
+            background-color: transparent;
+            color: white;
+        }
+
+        .form-floating>label {
+            color: white;
+        }
+
+        .form-floating input:focus {
+            background-color: transparent;
+            color: white;
+        }
+
+        .card {
+            height: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-img-top {
+            height: 380px;
+            object-fit: cover;
+            /* 이미지를 늘리거나 줄여서 요소에 맞춤 */
+            object-fit: cover;
+            overflow: hidden;
+            /* 이미지가 영역을 벗어날 때 잘리도록 설정 */
+            transition: transform 0.3s ease;
+            /* 호버 애니메이션 설정 */
+        }
+
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+            /* 이미지를 1.05배 확대하는 애니메이션 적용 */
+        }
+
+        .card-body {
+            background-color: white;
+            /* 하얀 배경색 적용 */
+            padding: 16px;
+            /* 내부 여백 추가 */
+        }
+
+        .input-group>label {
+            background-color: transparent;
+            color: white;
+        }
+
+        .card:hover {
+            cursor: pointer;
+        }
+
+        .mypostingbox>button {
+            width: 100%;
+        }
+
+        /* 동그라미 스타일 */
+        .circle {
+            width: 56px;
+            height: 28px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            /* 동그라미의 위쪽 간격 조정 */
+            right: 10px;
+            /* 동그라미의 오른쪽 간격 조정 */
+        }
+    </style>
+    <script type="module">
+        // Firebase SDK 라이브러리 가져오기
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoLpQInXgugpW1z4osO589CfWIffTJyL8",
+            authDomain: "sparta-b1db3.firebaseapp.com",
+            projectId: "sparta-b1db3",
+            storageBucket: "sparta-b1db3.appspot.com",
+            messagingSenderId: "921898868723",
+            appId: "1:921898868723:web:53a10cc0664eaa38d4fc86",
+            measurementId: "G-6YSGN77HXR"
+        };
+
+        // 입력 상자 클릭 이벤트를 처리하는 함수
+        function handleInputClick() {
+            // 입력 상자의 배경색과 글자색을 변경하여 텍스트가 보이게 만듭니다.
+            document.getElementById("purchase_url").style.backgroundColor = "transparent";
+            document.getElementById("purchase_url").style.color = "white";
+        }
+
+        // 입력 상자에 포커스 이벤트를 추가합니다.
+        document.getElementById("purchase_url").addEventListener("focus", handleInputClick);
+
+
+        // Firebase 인스턴스 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        $("#postingbtn").click(async function () {
+            await addBookToFirestore(data);
+            event.preventDefault();
+            alert('저장 완료!');
+            location.reload();
+        })
+
+        window.onload = async function () {
+            let docs = await getDocs(collection(db, "books"));
+
+            const uniqueBooks = {}; // 중복된 책을 필터링하기 위한 객체
+            docs.forEach((doc) => {
+                let row = doc.data();
+                let book_title = row['book_title'];
+                // 중복된 책을 필터링하여 한 번만 표시
+                if (book_title in uniqueBooks) {
+                    uniqueBooks[book_title].count++;
+                } else {
+                    uniqueBooks[book_title] = row;
+                    uniqueBooks[book_title].count = 1;
+                }
+            });
+
+            const booksArray = Object.values(uniqueBooks);
+            booksArray.sort((a, b) => b.count - a.count);
+
+            const bookCounts = {};
+            docs.forEach((doc) => {
+                let row = doc.data();
+                let book_title = row['book_title'];
+
+                if (book_title in bookCounts) {
+                    bookCounts[book_title]++;
+                } else {
+                    bookCounts[book_title] = 1;
+                }
+            });
+
+            booksArray.forEach((row) => {
+                let book_image = row['book_image'];
+                let book_title = row['book_title'];
+                let purchase_url = row['purchase_url'];
+                let author = row['author'];
+                let count = row['count']; // 중복된 갯수
+
+                // 카드 그려주는 곳
+                let temp_html = `
+                <div class="col">
+                    <div class="card" data-url="${purchase_url}">
+                        <img src="${book_image}"
+                            class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">${book_title}</h5>
+                            <p class="card-text">${author}</p>
+                        </div>
+                        <div class="circle">누적 ${count}</div>
+                    </div>
+                </div>`;
+                $('#card').append(temp_html);
+            });
+        }
+
+        $('#card').on('click', '.card', function () {
+            let url = $(this).data('url'); // 클릭한 카드의 data-url 속성 값 가져오기
+            window.open(url, '_blank'); // URL을 새 탭으로 열기
+        });
+
+        $("#savebtn").click(async function () {
+            $('#postingbox').toggle();
+        })
+
+    </script>
+</head>
+
+<body>
+    <header class="p-3 text-bg-dark">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                    <!-- <img src="templates/logo.png" alt="Spartaflix Logo" width="40" height="32"> -->
+                    <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg>
+                </a>
+
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li><a href="#" class="nav-link px-2 text-danger">Sparta Bookshelf</a>
+                    </li>
+                </ul>
+
+                <div class="text-end">
+                    <button id="savebtn" type="button" class="btn btn-danger">도서 기록하기</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="main">
+        <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">스파르타의 서재</h1>
+            </div>
+        </div>
+    </div>
+
+    <form class="mypostingbox" id="postingbox" action="http://127.0.0.1:5000/save">
+        <div class="form-floating mb-3">
+            <input type="text" name="query_link" class="form-control" id="purchase_url" placeholder="책 구매 링크">
+            <label for="floatingInput">책 구매 링크</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" name="query_buyer" class="form-control" id="buyer" placeholder="구매자">
+            <label for="floatingInput">구매자</label>
+        </div>
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="inputGr oupSelect01">팀</label>
+            <select class="form-select" name="query_team" id="team">
+                <option selected>팀 선택</option>
+                <option value="온라인팀">온라인팀</option>
+                <option value="부트캠프2팀">KDT팀</option>
+                <option value="부트캠프1팀">항해팀</option>
+                <option value="B2B팀">B2B팀</option>
+                <option value="외주팀">외주팀</option>
+                <option value="스튜디오팀">스튜디오팀</option>
+                <option value="글로벌팀">글로벌팀</option>
+                <option value="마케팅팀">마케팅팀</option>
+                <option value="개발팀">개발팀</option>
+                <option value="디자인팀">디자인팀</option>
+                <option value="콘텐츠팀">콘텐츠팀</option>
+                <option value="CX팀">CX팀</option>
+                <option value="피플팀">피플팀</option>
+                <option value="재무팀">재무팀</option>
+            </select>
+        </div>
+        <button id="postingbtn" type="submit" class="btn btn-danger">기록하기</button>
+    </form>
+
+    <div class="mycards">
+        <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
+        </div>
+    </div>
+
+
+</body>
+
+</html>

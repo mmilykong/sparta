@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영화 쨘</title>
+</head>
+<body>
+    <form action="{{url_for('movie')}}">
+        <input type="text" name="query">
+        <button type="submit">검색</button>
+    </form>
+    {{data}}
+</body>
+</html>
